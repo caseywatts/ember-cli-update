@@ -12,7 +12,8 @@ init:
 install:
   - ps: Install-Product node $env:nodejs_version
   - npm config set spin false
-  - npm install -g npm@5.4.1
+  - ps: If ($env:nodejs_version -eq "4") {npm install -g npm@3}
+  - ps: If ($env:nodejs_version -eq "8") {npm install -g npm@5.4.1}
   - npm install
 
 # Post-install test scripts.
