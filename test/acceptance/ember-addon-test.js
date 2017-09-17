@@ -2,10 +2,10 @@
 
 const expect = require('chai').expect;
 const AddonTestApp = require('ember-cli-addon-tests').AddonTestApp;
-const spawn = require('cross-spawn');
+// const spawn = require('cross-spawn');
 const semver = require('semver');
 const gitFixtures = require('git-fixtures');
-const debug = require('debug')('ember-cli-update');
+// const debug = require('debug')('ember-cli-update');
 const run = require('../../src/run');
 
 const gitInit = gitFixtures.gitInit;
@@ -79,40 +79,40 @@ describe('Acceptance | ember-addon', function() {
       });
 
       if (isNode4Windows) {
-        return new Promise(resolve => {
-          (function start() {
-            let server = spawn('node', [
-              'node_modules/ember-cli/bin/ember',
-              'update',
-              '--to',
-              '2.14.1'
-            ], {
-              cwd: app.path,
-              env: process.env
-            });
+        // return new Promise(resolve => {
+        //   (function start() {
+        //     let server = spawn('node', [
+        //       'node_modules/ember-cli/bin/ember',
+        //       'update',
+        //       '--to',
+        //       '2.14.1'
+        //     ], {
+        //       cwd: app.path,
+        //       env: process.env
+        //     });
 
-            let id = setTimeout(() => {
-              debug('timed out waiting for output');
-              server.stdout.removeAllListeners();
-              server.kill('SIGINT');
-              server.on('exit', () => {
-                run('git reset --hard', {
-                  cwd: app.path
-                });
-                run('git clean -f', {
-                  cwd: app.path
-                });
-                start();
-              });
-            }, 10000);
+        //     let id = setTimeout(() => {
+        //       debug('timed out waiting for output');
+        //       server.stdout.removeAllListeners();
+        //       server.kill('SIGINT');
+        //       server.on('exit', () => {
+        //         run('git reset --hard', {
+        //           cwd: app.path
+        //         });
+        //         run('git clean -f', {
+        //           cwd: app.path
+        //         });
+        //         start();
+        //       });
+        //     }, 10000);
 
-            server.stdout.once('data', () => {
-              clearTimeout(id);
-              app.server = server;
-              resolve();
-            });
-          })();
-        });
+        //     server.stdout.once('data', () => {
+        //       clearTimeout(id);
+        //       app.server = server;
+        //       resolve();
+        //     });
+        //   })();
+        // });
       }
 
       return app.startServer({
