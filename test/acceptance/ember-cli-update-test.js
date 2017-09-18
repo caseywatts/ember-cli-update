@@ -1,5 +1,6 @@
 'use strict';
 
+const path = require('path');
 const expect = require('chai').expect;
 const tmp = require('tmp');
 const fs = require('fs-extra');
@@ -16,13 +17,20 @@ const commitMessage = 'add files';
 function buildTmp(
   fixturesPath,
   tmpPath,
-  dirty
+  dirty,
+  subfolder
 ) {
   gitInit({
     cwd: tmpPath
   });
 
-  fs.copySync(fixturesPath, tmpPath);
+  let copyPath = tmpPath;
+  if (subfolder) {
+    copyPath = path.join(copyPath, 'subfolder');
+    fs.mkdirSync(copyPath);
+  }
+
+  fs.copySync(fixturesPath, copyPath);
 
   commit({
     m: commitMessage,
@@ -47,12 +55,19 @@ describe('Acceptance - ember-cli-build', function() {
   function merge(options) {
     let fixturesPath = options.fixturesPath;
     let dirty = options.dirty;
+    let subfolder = options.subfolder;
 
     buildTmp(
       fixturesPath,
       tmpPath,
-      dirty
+      dirty,
+      subfolder
     );
+
+    let copyPath = tmpPath;
+    if (subfolder) {
+      copyPath = path.join(copyPath, 'subfolder');
+    }
 
     return processBin({
       binFile: 'ember-cli-update',
@@ -60,7 +75,7 @@ describe('Acceptance - ember-cli-build', function() {
         '--to',
         '2.14.1'
       ],
-      cwd: tmpPath,
+      cwd: copyPath,
       commitMessage,
       expect
     });
@@ -139,6 +154,18 @@ describe('Acceptance - ember-cli-build', function() {
       let stderr = result.stderr;
 
       expect(stderr).to.contain('Ember CLI was not found in this project\'s package.json');
+    });
+  });
+
+  it('works when ember project is subfolder of git dir', function() {
+    return merge({
+      fixturesPath: 'test/fixtures/local/my-app',
+      subfolder: true
+    }).then(result => {
+      let stderr = result.stderr;
+
+      expect(stderr).to.contain('You must start with a clean working directory');
+      expect(stderr).to.not.contain('UnhandledPromiseRejectionWarning');
     });
   });
 });
